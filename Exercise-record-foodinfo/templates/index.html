@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+</head>
+<body>
+    <h1> 이미지 분류 </h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="image" onchange="previewImage(this)">
+        <input type="button" value="분류하기" onclick="uploadImage()">
+    </form><br>
+    <img id="preview" width="299" height="299" style="display:none;">
+    <h2 id="prediction"></h2>
+
+    <div id="foodInfo"></div>
+    <script>
+        function previewImage(input){
+            let file = input.files[0];
+            let reader = new FileReader();
+            reader.onload = function(e){
+                $("#preview").attr("src",e.target.result).show();
+            }
+            reader.readAsDataURL(file);
+        }
+        function uploadImage(){
+         let formData = new FormData($("#uploadForm")[0]);
+         $.ajax({
+               type : "POST"
+              ,url : "/upload"
+              ,data : formData
+              ,contentType : false
+              ,processData : false
+              ,success :function(res){
+                $("#prediction").text("prediction: " + res.prediction);
+
+                let foodInfoHTML = "<h3>음식 정보:</h3>";
+                console.log(res.food_info);
+                for (let i = 0; i < res.food_info.length; i++) {
+                    foodInfoHTML += "<p>이름: " + res.food_info[i].kname + "</p>";
+                    foodInfoHTML += "<p>단백질: " + res.food_info[i].protein + "</p>";
+                    foodInfoHTML += "<p>탄수화물: " + res.food_info[i].carbohydrates + "</p>";
+                    foodInfoHTML += "<p>지방: " + res.food_info[i].fat + "</p>";
+                    foodInfoHTML += "<p>비타민: " + res.food_info[i].vitamins + "</p>";
+
+                }
+                $("#foodInfo").html(foodInfoHTML);
+              }
+         });
+        }
+
+
+    </script>
+</body>
+</html>
